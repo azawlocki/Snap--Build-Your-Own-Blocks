@@ -1,0 +1,88 @@
+<blocks app="Snap! 4.0, http://snap.berkeley.edu" version="1">
+
+  <block-definition s="ev3 request %'command' %'params'" type="reporter" category="other">
+    <header/>
+    <code/>
+    <inputs>
+      <input type="%txt"/>
+      <input type="%mult%txt"/>
+    </inputs>
+    <script>
+      <block s="doDeclareVariables">
+        <list>
+          <l>getEv3Request</l>
+        </list>
+      </block>
+      <block s="doSetVar">
+        <l>getEv3Request</l>
+        <block s="reportJSFunction">
+          <list>
+            <l>cmd</l>
+            <l>paramObject</l>
+          </list>
+          <l>
+var addr = window.location.href.substr(7);
+var req = addr + 'ev3/' + cmd;
+var params = paramObject.contents;
+if (params.length &gt; 0) {
+  req += '?';
+  for (var i = 0, len = params.length; i &lt; len; i++) {
+    req += params[i];
+    if (i &lt; len - 1) {
+      req += '&amp;';
+    }
+  }
+}
+return req;
+          </l>
+        </block>
+      </block>
+      <block s="doReport">
+        <block s="reportJoinWords">
+          <list>
+            <block s="evaluate">
+              <block var="getEv3Request"/>
+              <list>
+                <block var="command"/>
+                <block var="params"/>
+              </list>
+            </block>
+          </list>
+        </block>
+      </block>
+    </script>
+  </block-definition>
+
+  <block-definition s="get sensor %'portName' value number %'index'" type="reporter" category="sensing">
+    <header/>
+    <code/>
+    <inputs>
+      <input type="%txt"/>
+      <input type="%n"/>
+    </inputs>
+    <script>
+      <block s="doReport">
+        <block s="reportURL">
+          <custom-block s="ev3 request %txt %mult%txt">
+            <l>sensor</l>
+            <list>
+              <block s="reportJoinWords">
+                <list>
+                  <l>portName=</l>
+                  <block var="portName"/>
+                </list>
+              </block>
+              <block s="reportJoinWords">
+                <list>
+                  <l>index=</l>
+                  <block var="index"/>
+                </list>
+              </block>
+            </list>
+          </custom-block>
+        </block>
+      </block>
+    </script>
+  </block-definition>
+  
+</blocks>
