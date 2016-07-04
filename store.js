@@ -56,11 +56,12 @@ Color, List, newCanvas, Costume, Sound, Audio, IDE_Morph, ScriptsMorph,
 BlockMorph, ArgMorph, InputSlotMorph, TemplateSlotMorph, CommandSlotMorph,
 FunctionSlotMorph, MultiArgMorph, ColorSlotMorph, nop, CommentMorph, isNil,
 localize, sizeOf, ArgLabelMorph, SVG_Costume, MorphicPreferences,
-SyntaxElementMorph, Variable, isSnapObject, console, BooleanSlotMorph*/
+SyntaxElementMorph, Variable, isSnapObject, console, BooleanSlotMorph,
+normalizeCanvas*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.store = '2016-June-01';
+modules.store = '2016-June-17';
 
 
 // XML_Serializer ///////////////////////////////////////////////////////
@@ -389,6 +390,7 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
     if (model.pentrails) {
         project.pentrails = new Image();
         project.pentrails.onload = function () {
+            normalizeCanvas(project.stage.trailsCanvas);
             var context = project.stage.trailsCanvas.getContext('2d');
             context.drawImage(project.pentrails, 0, 0);
             project.stage.changed();
@@ -1182,7 +1184,7 @@ SnapSerializer.prototype.loadValue = function (model) {
             record();
             lst = v;
             items = model.childrenNamed('item');
-            items.forEach(function (item) {
+            items.forEach(function (item, i) {
                 var value = item.children[0];
                 if (!value) {
                     v.first = 0;
@@ -1194,9 +1196,11 @@ SnapSerializer.prototype.loadValue = function (model) {
                 if (tail) {
                     v.rest = myself.loadValue(tail);
                 } else {
-                    v.rest = new List();
-                    v = v.rest;
-                    v.isLinked = true;
+                    if (i < (items.length - 1)) {
+                        v.rest = new List();
+                        v = v.rest;
+                        v.isLinked = true;
+                    }
                 }
             });
             return lst;
@@ -1506,7 +1510,7 @@ StageMorph.prototype.toXML = function (serializer) {
         this.enableInheritance,
         this.enableSublistIDs,
         StageMorph.prototype.frameRate !== 0,
-        this.trailsCanvas.toDataURL('image/png'),
+        normalizeCanvas(this.trailsCanvas, true).toDataURL('image/png'),
         serializer.store(this.costumes, this.name + '_cst'),
         serializer.store(this.sounds, this.name + '_snd'),
         serializer.store(this.variables),

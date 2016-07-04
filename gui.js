@@ -62,7 +62,7 @@ InputFieldMorph, FrameMorph, Process, nop, SnapSerializer, ListMorph, detect,
 AlignmentMorph, TabMorph, Costume, MorphicPreferences, Sound, BlockMorph,
 ToggleMorph, InputSlotDialogMorph, ScriptsMorph, isNil, SymbolMorph,
 BlockExportDialogMorph, BlockImportDialogMorph, SnapTranslator, localize,
-List, InputSlotMorph, SnapCloud, Uint8Array, HandleMorph, SVG_Costume,
+List, ArgMorph, SnapCloud, Uint8Array, HandleMorph, SVG_Costume,
 fontHeight, hex_sha512, sb, CommentMorph, CommandBlockMorph,
 BlockLabelPlaceHolderMorph, Audio, SpeechBubbleMorph, ScriptFocusMorph,
 XML_Element, WatcherMorph, BlockRemovalDialogMorph, saveAs, TableMorph,
@@ -71,7 +71,7 @@ isRetinaSupported*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2016-June-01';
+modules.gui = '2016-July-04';
 
 // Declarations
 
@@ -1810,6 +1810,7 @@ IDE_Morph.prototype.toggleRetina = function () {
     }
     this.world().fillPage();
     IDE_Morph.prototype.scriptsPaneTexture = this.scriptsTexture();
+    this.stage.clearPenTrails();
     this.drawNew();
     this.refreshIDE();
 };
@@ -1903,17 +1904,17 @@ IDE_Morph.prototype.applySavedSettings = function () {
     }
 
     // keyboard editing
-    if (keyboard) {
-        ScriptsMorph.prototype.enableKeyboard = true;
-    } else {
+    if (keyboard === 'false') {
         ScriptsMorph.prototype.enableKeyboard = false;
+    } else {
+        ScriptsMorph.prototype.enableKeyboard = true;
     }
 
     // tables
-    if (tables) {
-        List.prototype.enableTables = true;
-    } else {
+    if (tables === 'false') {
         List.prototype.enableTables = false;
+    } else {
+        List.prototype.enableTables = true;
     }
 
     // tableLines
@@ -2355,7 +2356,7 @@ IDE_Morph.prototype.settingsMenu = function () {
         addPreference(
             'Execute on slider change',
             'toggleSliderExecute',
-            InputSlotMorph.prototype.executeOnSliderEdit,
+            ArgMorph.prototype.executeOnSliderEdit,
             'uncheck to supress\nrunning scripts\nwhen moving the slider',
             'check to run\nthe edited script\nwhen moving the slider'
         );
@@ -2470,9 +2471,9 @@ IDE_Morph.prototype.settingsMenu = function () {
             ScriptsMorph.prototype.enableKeyboard =
                 !ScriptsMorph.prototype.enableKeyboard;
             if (ScriptsMorph.prototype.enableKeyboard) {
-                myself.saveSetting('keyboard', true);
-            } else {
                 myself.removeSetting('keyboard');
+            } else {
+                myself.saveSetting('keyboard', false);
             }
         },
         ScriptsMorph.prototype.enableKeyboard,
@@ -2486,9 +2487,9 @@ IDE_Morph.prototype.settingsMenu = function () {
             List.prototype.enableTables =
                 !List.prototype.enableTables;
             if (List.prototype.enableTables) {
-                myself.saveSetting('tables', true);
-            } else {
                 myself.removeSetting('tables');
+            } else {
+                myself.saveSetting('tables', false);
             }
         },
         List.prototype.enableTables,
@@ -4169,8 +4170,8 @@ IDE_Morph.prototype.toggleInputSliders = function () {
 };
 
 IDE_Morph.prototype.toggleSliderExecute = function () {
-    InputSlotMorph.prototype.executeOnSliderEdit =
-        !InputSlotMorph.prototype.executeOnSliderEdit;
+    ArgMorph.prototype.executeOnSliderEdit =
+        !ArgMorph.prototype.executeOnSliderEdit;
 };
 
 IDE_Morph.prototype.toggleAppMode = function (appMode) {
@@ -4331,7 +4332,10 @@ IDE_Morph.prototype.languageMenu = function () {
         menu.addItem(
             (SnapTranslator.language === lang ? '\u2713 ' : '    ') +
                 SnapTranslator.languageName(lang),
-            function () {myself.setLanguage(lang); }
+            function () {
+                myself.loadNewProject = false;
+                myself.setLanguage(lang);
+            }
         );
     });
     menu.popup(world, pos);
