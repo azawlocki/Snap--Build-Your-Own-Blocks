@@ -3,14 +3,36 @@ function EV3CodeGenerator(ide) {
     this.varNumber = 0;
 }
 
-EV3CodeGenerator.prototype.exportEV3Code = function () {
+
+EV3CodeGenerator.prototype.exportEV3Code = function() {
+    code = this.generateCode();
+    if (code.length > 0) {
+        this.ide.saveFileAs(code, 'text/py;charset=utf-8', 'ev3program');
+    }
+};
+
+
+EV3CodeGenerator.prototype.deployEV3Code = function() {
+    code = this.generateCode();
+
+    var data = new FormData();
+    data.append('code', code);
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/ev3/deploy', true);
+    xhr.onload = function() {
+        console.log(this.responseText);
+    }
+    xhr.send(data)
+};
+
+
+EV3CodeGenerator.prototype.generateCode = function() {
     try {
         msg = this.ide.showMessage('Generating EV3 code...');
         code = this.generateStage(this.ide.stage);
         msg.destroy();
-        if (code.length > 0) {
-            this.ide.saveFileAs(code, 'text/py;charset=utf-8', 'ev3program');
-        }
+        return code;
     } catch (err) {
         if (Process.prototype.isCatchingErrors) {
             this.ide.showMessage('Code generation failed: ' + err);
@@ -18,8 +40,8 @@ EV3CodeGenerator.prototype.exportEV3Code = function () {
             throw err;
         }
     }
+    return "";
 };
-
 
 EV3CodeGenerator.prototype.generateStage = function(stage) {
     // stub

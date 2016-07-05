@@ -2746,6 +2746,11 @@ IDE_Morph.prototype.projectMenu = function () {
         function () { new EV3CodeGenerator(myself).exportEV3Code(); },
         'generate Python program for running at an EV3 robot'
     );
+    menu.addItem(
+        'Deploy EV3 program',
+        function () { new EV3CodeGenerator(myself).deployEV3Code(); },
+        'generate Python program for running at an EV3 robot'
+    );
 
     menu.addLine();
     menu.addItem(
